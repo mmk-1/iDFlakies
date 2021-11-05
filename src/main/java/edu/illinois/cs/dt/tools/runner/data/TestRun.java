@@ -58,7 +58,8 @@ public class TestRun {
                 Files.createDirectories(outputPath.getParent());
                 Files.write(outputPath, results.toString().getBytes());
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         System.out.printf("Verified %s, status: expected %s, got %s\n",
                           dt, this.result, newResult);

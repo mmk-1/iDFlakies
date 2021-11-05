@@ -1,15 +1,16 @@
 package edu.illinois.cs.dt.tools.utility;
 
-import com.google.gson.Gson;
 import edu.illinois.cs.dt.tools.detection.DetectorPathManager;
 import edu.illinois.cs.dt.tools.runner.InstrumentingSmartRunner;
 import edu.illinois.cs.testrunner.configuration.Configuration;
-import edu.illinois.cs.testrunner.data.results.TestRunResult;
 import edu.illinois.cs.testrunner.coreplugin.TestPlugin;
 import edu.illinois.cs.testrunner.coreplugin.TestPluginUtil;
+import edu.illinois.cs.testrunner.data.results.TestRunResult;
 import edu.illinois.cs.testrunner.runner.Runner;
 import edu.illinois.cs.testrunner.runner.RunnerFactory;
 import edu.illinois.cs.testrunner.util.ProjectWrapper;
+
+import com.google.gson.Gson;
 import scala.Option;
 import scala.util.Try;
 

@@ -3,10 +3,10 @@ package edu.illinois.cs.dt.tools.detection;
 import edu.illinois.cs.dt.tools.runner.data.DependentTest;
 import edu.illinois.cs.dt.tools.runner.data.TestRun;
 import edu.illinois.cs.testrunner.configuration.Configuration;
+import edu.illinois.cs.testrunner.coreplugin.TestPluginUtil;
 import edu.illinois.cs.testrunner.data.results.Result;
 import edu.illinois.cs.testrunner.data.results.TestResult;
 import edu.illinois.cs.testrunner.data.results.TestRunResult;
-import edu.illinois.cs.testrunner.coreplugin.TestPluginUtil;
 import edu.illinois.cs.testrunner.runner.Runner;
 
 import java.io.IOException;
@@ -33,8 +33,10 @@ public class DetectorUtil {
 
             try {
                 Files.write(DetectorPathManager.originalResultsLog(), (origResult.id() + "\n").getBytes(),
-                        Files.exists(DetectorPathManager.originalResultsLog()) ? StandardOpenOption.APPEND : StandardOpenOption.CREATE);
-            } catch (IOException ignored) {}
+                    Files.exists(DetectorPathManager.originalResultsLog())
+                        ? StandardOpenOption.APPEND : StandardOpenOption.CREATE);
+            } catch (IOException ignored) {
+            }
 
             if (allPass(origResult)) {
                 allPassing = true;
@@ -46,7 +48,8 @@ public class DetectorUtil {
             if (allMustPass) {
                 throw new NoPassingOrderException("No passing order for tests (" + originalOrderTries + " runs)");
             } else {
-                TestPluginUtil.project.info("No passing order for tests (" + originalOrderTries + " runs). Continuing anyway with last run.");
+                TestPluginUtil.project.info("No passing order for tests (" + originalOrderTries + " runs)."
+                    + " Continuing anyway with last run.");
             }
         }
 

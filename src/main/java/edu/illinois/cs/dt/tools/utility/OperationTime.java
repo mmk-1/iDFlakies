@@ -5,6 +5,16 @@ import com.reedoei.eunomia.functional.ThrowingBiFunction;
 import java.util.concurrent.Callable;
 
 public class OperationTime {
+    private final long startTime;
+    private final long endTime;
+    private final double elapsedSeconds;
+
+    public OperationTime(final long startTime, final long endTime) {
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.elapsedSeconds = endTime / 1000.0 - startTime / 1000.0;
+    }
+
     public static <T,U> U runOperation(final Callable<T> callable,
                                        final ThrowingBiFunction<T, OperationTime, U> constructor)
             throws Exception {
@@ -17,16 +27,6 @@ public class OperationTime {
 
     public static OperationTime instantaneous() {
         return new OperationTime(System.currentTimeMillis(), System.currentTimeMillis());
-    }
-
-    private final long startTime;
-    private final long endTime;
-    private final double elapsedSeconds;
-
-    public OperationTime(final long startTime, final long endTime) {
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.elapsedSeconds = endTime / 1000.0 - startTime / 1000.0;
     }
 
     public long startTime() {

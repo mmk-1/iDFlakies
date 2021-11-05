@@ -12,7 +12,8 @@ public class OriginalDetector extends ExecutingDetector {
     private final List<String> tests;
     private TestRunResult origResult;
 
-    public OriginalDetector(final Runner runner, final int rounds, final List<String> tests, final TestRunResult origResult) {
+    public OriginalDetector(final Runner runner, final int rounds, final List<String> tests,
+            final TestRunResult origResult) {
         super(runner, rounds, "original");
 
         this.tests = tests;

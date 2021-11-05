@@ -1,10 +1,5 @@
 package edu.illinois.cs.dt.tools.analysis;
 
-import com.google.gson.Gson;
-import com.opencsv.CSVReader;
-import com.reedoei.eunomia.collections.ListEx;
-import com.reedoei.eunomia.io.files.FileUtil;
-import com.reedoei.eunomia.util.StandardMain;
 import edu.illinois.cs.dt.tools.detection.DetectionRound;
 import edu.illinois.cs.dt.tools.detection.DetectorPathManager;
 import edu.illinois.cs.dt.tools.detection.DetectorUtil;
@@ -16,6 +11,12 @@ import edu.illinois.cs.dt.tools.utility.TestRunParser;
 import edu.illinois.cs.testrunner.data.results.Result;
 import edu.illinois.cs.testrunner.data.results.TestResult;
 import edu.illinois.cs.testrunner.data.results.TestRunResult;
+
+import com.google.gson.Gson;
+import com.opencsv.CSVReader;
+import com.reedoei.eunomia.collections.ListEx;
+import com.reedoei.eunomia.io.files.FileUtil;
+import com.reedoei.eunomia.util.StandardMain;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.FileInputStream;
@@ -42,22 +43,6 @@ import java.util.stream.Stream;
 // TODO: would probably be better to have these insert methods in their respective classes with some
 //       interface or something...
 public class Analysis extends StandardMain {
-    public static int roundNumber(final String filename) {
-        // Files are named roundN.json, so strip extension and "round" and we'll have the number
-        final String fileName = FilenameUtils.removeExtension(filename);
-        return Integer.parseInt(fileName.substring("round".length()));
-    }
-
-    // List files and close the directory streams
-    private static ListEx<Path> listFiles(final Path path) throws IOException {
-        final ListEx<Path> result = new ListEx<>();
-
-        try (final Stream<Path> stream = Files.list(path)) {
-            result.addAll(stream.collect(Collectors.toList()));
-        }
-
-        return result;
-    }
 
     private final Path results;
     private final SQLite sqlite;
@@ -74,6 +59,23 @@ public class Analysis extends StandardMain {
         this.subjectList = Paths.get(getArgRequired("subjectList")).toAbsolutePath();
         this.subjectListLOC = Paths.get(getArgRequired("subjectListLoc")).toAbsolutePath();
         this.maxTestRuns = getArg("max-test-runs").map(Integer::parseInt).orElse(0);
+    }
+
+    public static int roundNumber(final String filename) {
+        // Files are named roundN.json, so strip extension and "round" and we'll have the number
+        final String fileName = FilenameUtils.removeExtension(filename);
+        return Integer.parseInt(fileName.substring("round".length()));
+    }
+
+    // List files and close the directory streams
+    private static ListEx<Path> listFiles(final Path path) throws IOException {
+        final ListEx<Path> result = new ListEx<>();
+
+        try (final Stream<Path> stream = Files.list(path)) {
+            result.addAll(stream.collect(Collectors.toList()));
+        }
+
+        return result;
     }
 
     public static void main(final String[] args) {
@@ -110,7 +112,8 @@ public class Analysis extends StandardMain {
 
         for (int i = 0; i < allResultsFolders.size(); i++) {
             final Path p = allResultsFolders.get(i);
-            System.out.println("[INFO] Inserting results for module " + (i + 1) + " of " + allResultsFolders.size() + ": " + p);
+            System.out.println("[INFO] Inserting results for module " + (i + 1) + " of "
+                + allResultsFolders.size() + ": " + p);
             try {
                 insertResults(p);
             } catch (IOException | SQLException e) {
@@ -249,9 +252,11 @@ public class Analysis extends StandardMain {
         // If we got a no passing order exception, don't insert any of the other results
         if (!foundPassing) {
             System.out.println("[WARNING] SKIPPING: No passing order found for: " + name);
-            for (final String detectorType : new String[] { "original", "random", "random-class", "reverse", "reverse-class"}) {
+            for (final String detectorType : new String[]
+                { "original", "random", "random-class", "reverse", "reverse-class"}) {
                 if (Files.isDirectory(path.resolve(DetectorPathManager.DETECTION_RESULTS).resolve(detectorType))) {
-                    System.out.println("[ERROR]: " + detectorType + " results for " + name + " at " + path.resolve(DetectorPathManager.DETECTION_RESULTS).resolve(detectorType));
+                    System.out.println("[ERROR]: " + detectorType + " results for " + name + " at "
+                        + path.resolve(DetectorPathManager.DETECTION_RESULTS).resolve(detectorType));
                 }
             }
             return;
@@ -272,9 +277,12 @@ public class Analysis extends StandardMain {
         insertVerificationResults(name, "reverse-verify", path.resolve(DetectorPathManager.DETECTION_RESULTS));
         insertVerificationResults(name, "reverse-class-verify", path.resolve(DetectorPathManager.DETECTION_RESULTS));
         insertVerificationResults(name, "random-confirmation-sampling", path.resolve(DetectorPathManager.DETECTION_RESULTS));
-        insertVerificationResults(name, "random-class-confirmation-sampling", path.resolve(DetectorPathManager.DETECTION_RESULTS));
-        insertVerificationResults(name, "reverse-confirmation-sampling", path.resolve(DetectorPathManager.DETECTION_RESULTS));
-        insertVerificationResults(name, "reverse-class-confirmation-sampling", path.resolve(DetectorPathManager.DETECTION_RESULTS));
+        insertVerificationResults(name, "random-class-confirmation-sampling",
+            path.resolve(DetectorPathManager.DETECTION_RESULTS));
+        insertVerificationResults(name, "reverse-confirmation-sampling",
+            path.resolve(DetectorPathManager.DETECTION_RESULTS));
+        insertVerificationResults(name, "reverse-class-confirmation-sampling",
+            path.resolve(DetectorPathManager.DETECTION_RESULTS));
 
 //        sqlite.save();
 
@@ -470,8 +478,8 @@ public class Analysis extends StandardMain {
                         System.out.println("Found an original order to try to insert: " + trr.id());
                         final List<DependentTest> result = DetectorUtil.flakyTests(passing, trr, true);
                         final DetectionRound dr = new DetectionRound(Collections.singletonList(trr.id()), result,
-                                result.stream().filter(t -> !knownFlakyTests.contains(t.name())).collect(Collectors.toList()),
-                                -1);
+                                result.stream().filter(t -> !knownFlakyTests.contains(t.name()))
+                                    .collect(Collectors.toList()), -1);
                         try {
                             insertDetectionRound(subjectName, "original", counter.incrementAndGet(), dr);
                         } catch (IOException | SQLException e) {
@@ -551,7 +559,8 @@ public class Analysis extends StandardMain {
                 .insertSingleRow();
     }
 
-    private void insertVerificationResults(final String name, final String roundType, final Path basePath) throws IOException {
+    private void insertVerificationResults(final String name, final String roundType,final Path basePath)
+            throws IOException {
         final Path verificationResults = basePath.resolve(roundType);
 
         if (!Files.isDirectory(verificationResults)) {
@@ -560,7 +569,8 @@ public class Analysis extends StandardMain {
 
         final ListEx<Path> paths = listFiles(verificationResults);
 
-        System.out.println("[INFO] Inserting " + roundType + " verification results for " + name + " (" + paths.size() + " rounds)");
+        System.out.println("[INFO] Inserting " + roundType + " verification results for "
+            + name + " (" + paths.size() + " rounds)");
 
         paths.forEach(p -> {
             try {
@@ -571,7 +581,8 @@ public class Analysis extends StandardMain {
         });
     }
 
-    private void insertVerificationRound(final String name, final String roundType, final int roundNumber, final Path p) throws IOException {
+    private void insertVerificationRound(final String name, final String roundType, final int roundNumber, final Path p)
+            throws IOException {
         listFiles(p).forEach(verificationStep -> {
             final String filename = verificationStep.getFileName().toString();
             final String[] split = filename.split("-");
@@ -581,7 +592,8 @@ public class Analysis extends StandardMain {
             final int verificationRoundNumber = roundNumber(split[2]);
 
             try {
-                final TestRunResult testRunResult = new Gson().fromJson(FileUtil.readFile(verificationStep), TestRunResult.class);
+                final TestRunResult testRunResult =
+                    new Gson().fromJson(FileUtil.readFile(verificationStep), TestRunResult.class);
 
                 sqlite.statement(SQLStatements.INSERT_VERIFICATION_ROUND)
                         .param(name)

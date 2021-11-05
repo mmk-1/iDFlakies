@@ -1,15 +1,16 @@
 package edu.illinois.cs.dt.tools.detection;
 
-import com.google.common.collect.Lists;
-import com.google.common.math.IntMath;
-import com.google.gson.Gson;
-import com.reedoei.eunomia.collections.ListUtil;
-import com.reedoei.eunomia.io.files.FileUtil;
 import edu.illinois.cs.dt.tools.runner.RunnerPathManager;
 import edu.illinois.cs.dt.tools.utility.MD5;
 import edu.illinois.cs.testrunner.configuration.Configuration;
 import edu.illinois.cs.testrunner.coreplugin.TestPluginUtil;
 import edu.illinois.cs.testrunner.data.results.TestRunResult;
+
+import com.google.common.collect.Lists;
+import com.google.common.math.IntMath;
+import com.google.gson.Gson;
+import com.reedoei.eunomia.collections.ListUtil;
+import com.reedoei.eunomia.io.files.FileUtil;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,10 +26,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class TestShuffler {
-    public static String className(final String testName) {
-        return testName.substring(0, testName.lastIndexOf('.'));
-    }
-
     private final HashMap<String, List<String>> classToMethods;
 
     private final String type;
@@ -61,6 +58,10 @@ public class TestShuffler {
             TestPluginUtil.project.info("dt.seed needs to be an integer, using default seed " + seed);
         }
         this.random = new Random(seed);
+    }
+
+    public static String className(final String testName) {
+        return testName.substring(0, testName.lastIndexOf('.'));
     }
 
     private String historicalType() {
@@ -102,7 +103,8 @@ public class TestShuffler {
             if (Files.exists(historicalRun)) {
                 return generateHistorical(readHistorical(historicalRun));
             }
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
 
         return generateShuffled();
     }
@@ -110,7 +112,7 @@ public class TestShuffler {
     private List<String> reverseOrder() {
         if ("reverse-class".equals(type)) {
             final List<String> reversedClassNames =
-                    Lists.reverse(ListUtil.map(TestShuffler::className, tests).stream().distinct().collect(Collectors.toList()));
+                Lists.reverse(ListUtil.map(TestShuffler::className, tests).stream().distinct().collect(Collectors.toList()));
 
             return reversedClassNames.stream().flatMap(c -> classToMethods.get(c).stream()).collect(Collectors.toList());
         } else {

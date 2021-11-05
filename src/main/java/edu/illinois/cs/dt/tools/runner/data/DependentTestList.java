@@ -1,11 +1,12 @@
 package edu.illinois.cs.dt.tools.runner.data;
 
+import edu.illinois.cs.testrunner.coreplugin.TestPluginUtil;
+import edu.illinois.cs.testrunner.data.results.Result;
+
 import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 import com.reedoei.eunomia.collections.ListUtil;
 import com.reedoei.eunomia.io.files.FileUtil;
-import edu.illinois.cs.testrunner.data.results.Result;
-import edu.illinois.cs.testrunner.coreplugin.TestPluginUtil;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -17,6 +18,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DependentTestList {
+
+    private final List<DependentTest> dts;
+
+    public DependentTestList(final Stream<DependentTest> dts) {
+        this(dts.collect(Collectors.toList()));
+    }
+
+    public DependentTestList(final List<DependentTest> dts) {
+        this.dts = dts;
+    }
+
     public static DependentTestList empty() {
         return new DependentTestList(new ArrayList<>());
     }
@@ -52,20 +64,11 @@ public class DependentTestList {
             final List<String> modifiedOrder =
                     ListUtil.read(modifiedOrderLine.replace("when executed after: ", ""));
 
-            dts.add(new DependentTest(test, new TestRun(originalOrder, intended, "unknown"), new TestRun(modifiedOrder, revealed, "unknown")));
+            dts.add(new DependentTest(test, new TestRun(originalOrder, intended, "unknown"),
+                new TestRun(modifiedOrder, revealed, "unknown")));
         }
 
         return new DependentTestList(dts);
-    }
-
-    private final List<DependentTest> dts;
-
-    public DependentTestList(final Stream<DependentTest> dts) {
-        this(dts.collect(Collectors.toList()));
-    }
-
-    public DependentTestList(final List<DependentTest> dts) {
-        this.dts = dts;
     }
 
     @Override

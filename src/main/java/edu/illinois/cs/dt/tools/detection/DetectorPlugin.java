@@ -1,8 +1,5 @@
 package edu.illinois.cs.dt.tools.detection;
 
-import com.google.common.collect.Lists;
-import com.opencsv.CSVReader;
-import com.reedoei.eunomia.collections.ListEx;
 import edu.illinois.cs.dt.tools.detection.detectors.Detector;
 import edu.illinois.cs.dt.tools.detection.detectors.DetectorFactory;
 import edu.illinois.cs.dt.tools.runner.InstrumentingSmartRunner;
@@ -11,13 +8,17 @@ import edu.illinois.cs.dt.tools.utility.GetMavenTestOrder;
 import edu.illinois.cs.dt.tools.utility.OperationTime;
 import edu.illinois.cs.dt.tools.utility.TestClassData;
 import edu.illinois.cs.testrunner.configuration.Configuration;
-import edu.illinois.cs.testrunner.data.framework.TestFramework;
 import edu.illinois.cs.testrunner.coreplugin.TestPlugin;
 import edu.illinois.cs.testrunner.coreplugin.TestPluginUtil;
+import edu.illinois.cs.testrunner.data.framework.TestFramework;
 import edu.illinois.cs.testrunner.runner.Runner;
 import edu.illinois.cs.testrunner.runner.RunnerFactory;
 import edu.illinois.cs.testrunner.testobjects.TestLocator;
 import edu.illinois.cs.testrunner.util.ProjectWrapper;
+
+import com.google.common.collect.Lists;
+import com.opencsv.CSVReader;
+import com.reedoei.eunomia.collections.ListEx;
 import scala.collection.JavaConverters;
 
 import java.io.FileInputStream;
@@ -38,10 +39,11 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class DetectorPlugin extends TestPlugin {
+    private static Map<Integer, List<String>> locateTestList = new HashMap<>();
+
     private final Path outputPath;
     private String coordinates;
     private InstrumentingSmartRunner runner;
-    private static Map<Integer, List<String>> locateTestList = new HashMap<>();
     // useful for modules with JUnit 4 tests but depend on something in JUnit 5
     private final boolean forceJUnit4 = Configuration.config().getProperty("dt.detector.forceJUnit4", false);
 
@@ -102,7 +104,8 @@ public class DetectorPlugin extends TestPlugin {
         final ProjectWrapper parent = getMavenProjectParent(project);
 
         final Path timeCsv = parent.getBasedir().toPath().resolve("module-test-time.csv");
-        Files.copy(timeCsv, DetectorPathManager.detectionResults().resolve("module-test-time.csv"), StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(timeCsv, DetectorPathManager.detectionResults().resolve("module-test-time.csv"),
+            StandardCopyOption.REPLACE_EXISTING);
         final ListEx<ListEx<String>> csv = csv(timeCsv);
 
         // Skip the header row, sum the second column to get the total time
@@ -135,8 +138,8 @@ public class DetectorPlugin extends TestPlugin {
             }
         }
 
-        TestPluginUtil.project.info("TIMEOUT_CALCULATED: Giving " + coordinates + " " + timeout + " seconds to run for " +
-            DetectorFactory.detectorType());
+        TestPluginUtil.project.info("TIMEOUT_CALCULATED: Giving " + coordinates + " " + timeout + " seconds to run for "
+            + DetectorFactory.detectorType());
 
         return (long) timeout; // Allocate time proportionally
     }
@@ -168,20 +171,21 @@ public class DetectorPlugin extends TestPlugin {
                 final double mainTimeout = Configuration.config().getProperty("detector.timeout", 6 * 3600.0); // 6 hours
                 if (mainTimeout != 0) {
                     TestPluginUtil.project.info("TIMEOUT_VALUE: Using a timeout of "
-                                                          + mainTimeout + ", and that the total mvn test time is: " + totalTime);
+                        + mainTimeout + ", and that the total mvn test time is: " + totalTime);
 
                     timeoutRounds = (int) (mainTimeout / totalTime);
                 } else {
                     timeoutRounds = roundNum;
-                    TestPluginUtil.project.info("TIMEOUT_VALUE specified as 0. " +
-                                                          "Ignoring timeout and using number of rounds.");
+                    TestPluginUtil.project.info("TIMEOUT_VALUE specified as 0. "
+                        + "Ignoring timeout and using number of rounds.");
                 }
             } else {
-                // Depending on the order in which the developers tell Maven to build modules, some projects like http-request
-                // may not be able to parse the mvn-test-time.log at the base module if other submodules are built first
+                // Depending on the order in which the developers tell Maven to build modules, some projects like
+                // http-request may not be able to parse the mvn-test-time.log at the base module if other submodules
+                // are built first
                 timeoutRounds = roundNum;
-                TestPluginUtil.project.info("TIMEOUT_VALUE specified but cannot " +
-                                                      "read mvn-test-time.log at: " + timeCsv.toString());
+                TestPluginUtil.project.info("TIMEOUT_VALUE specified but cannot "
+                    + "read mvn-test-time.log at: " + timeCsv.toString());
                 TestPluginUtil.project.info("Ignoring timeout and using number of rounds.");
             }
         } else {
@@ -210,7 +214,8 @@ public class DetectorPlugin extends TestPlugin {
         logger.runAndLogError(() -> detectorExecute(logger, project, moduleRounds(coordinates)));
     }
 
-    private Void detectorExecute(final ErrorLogger logger, final ProjectWrapper project, final int rounds) throws IOException {
+    private Void detectorExecute(final ErrorLogger logger, final ProjectWrapper project, final int rounds)
+            throws IOException {
         Files.deleteIfExists(DetectorPathManager.errorPath());
         Files.createDirectories(DetectorPathManager.cachePath());
         Files.createDirectories(DetectorPathManager.detectionResults());
@@ -235,11 +240,11 @@ public class DetectorPlugin extends TestPlugin {
                 } else {
                     String errorMsg;
                     if (runners.size() == 0) {
-                        errorMsg =
-                            "Module is not using a supported test framework (probably not JUnit), " +
-                            "or there is no test.";
+                        errorMsg = "Module is not using a supported test framework (probably not JUnit), "
+                            + "or there is no test.";
                     } else {
-                        errorMsg = "dt.detector.forceJUnit4 is true but no JUnit 4 runners found. Perhaps the project only contains JUnit 5 tests.";
+                        errorMsg = "dt.detector.forceJUnit4 is true but no JUnit 4 runners found. "
+                            + "Perhaps the project only contains JUnit 5 tests.";
                     }
                     TestPluginUtil.project.info(errorMsg);
                     logger.writeError(errorMsg);
@@ -248,9 +253,8 @@ public class DetectorPlugin extends TestPlugin {
             } else {
                 String errorMsg;
                 if (runners.size() == 0) {
-                    errorMsg =
-                        "Module is not using a supported test framework (probably not JUnit), " +
-                        "or there is no test.";
+                    errorMsg = "Module is not using a supported test framework (probably not JUnit), "
+                        + "or there is no test.";
                 } else {
                     // more than one runner, currently is not supported.
                     errorMsg =
@@ -283,24 +287,27 @@ public class DetectorPlugin extends TestPlugin {
         return null;
     }
 
-    private static List<String> locateTests(ProjectWrapper project,
-					    TestFramework testFramework) {
-	int id = Objects.hash(project, testFramework);
-	if (!locateTestList.containsKey(id)) {
-	    TestPluginUtil.project.info("Locating tests...");
-	    try {
-		locateTestList.put(id,
-				   OperationTime.runOperation(() -> {
-					   return new ArrayList<String>(JavaConverters.bufferAsJavaList(TestLocator.tests(project, testFramework).toBuffer()));
-				       }, (tests, time) -> {
-					   TestPluginUtil.project.info("Located " + tests.size() + " tests. Time taken: " + time.elapsedSeconds() + " seconds");
-					   return tests;
-				       }));
-	    } catch (Exception e) {
-		throw new RuntimeException(e);
-	    }
-	}
-	return locateTestList.get(id);
+    private static List<String> locateTests(ProjectWrapper project, TestFramework testFramework) {
+        int id = Objects.hash(project, testFramework);
+        if (!locateTestList.containsKey(id)) {
+            TestPluginUtil.project.info("Locating tests...");
+            try {
+                locateTestList.put(id,
+                    OperationTime.runOperation(() -> {
+                            return new ArrayList<String>(JavaConverters.bufferAsJavaList(TestLocator.tests(project,
+                                testFramework).toBuffer()));
+                        }, (tests, time) -> {
+                            TestPluginUtil.project.info("Located " + tests.size()
+                                + " tests. Time taken: " + time.elapsedSeconds() + " seconds");
+                            return tests;
+                        }
+                    )
+                );
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return locateTestList.get(id);
     }
 
     public static List<String> getOriginalOrder(
@@ -321,7 +328,8 @@ public class DetectorPlugin extends TestPlugin {
                 final Path mvnTestLog = DetectorPathManager.mvnTestLog();
 
                 if (Files.exists(mvnTestLog) && Files.exists(surefireReportsPath)) {
-                    final List<TestClassData> testClassData = new GetMavenTestOrder(surefireReportsPath, mvnTestLog).testClassDataList();
+                    final List<TestClassData> testClassData =
+                        new GetMavenTestOrder(surefireReportsPath, mvnTestLog).testClassDataList();
 
                     final List<String> tests = new ArrayList<>();
 
@@ -337,7 +345,8 @@ public class DetectorPlugin extends TestPlugin {
                 } else {
                     return locateTests(project, testFramework);
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
 
             return locateTests(project, testFramework);
         } else {

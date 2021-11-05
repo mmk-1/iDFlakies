@@ -3,9 +3,9 @@ package edu.illinois.cs.dt.tools.utility;
 import edu.illinois.cs.dt.tools.detection.DetectorPathManager;
 import edu.illinois.cs.testrunner.coreplugin.TestPlugin;
 import edu.illinois.cs.testrunner.util.ProjectWrapper;
+
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.List;
+import javax.xml.parsers.ParserConfigurationException;
 
 public class ModuleTestTimePlugin  extends TestPlugin {
     private String coordinates;
@@ -44,7 +45,8 @@ public class ModuleTestTimePlugin  extends TestPlugin {
         }
     }
 
-    private double timeFrom(final Path path, final Path mvnTestLog) throws IOException, ParserConfigurationException, SAXException {
+    private double timeFrom(final Path path, final Path mvnTestLog)
+            throws IOException, ParserConfigurationException, SAXException {
         if (Files.exists(path)) {
             return new GetMavenTestOrder(path, mvnTestLog).testClassDataList().stream()
                     .mapToDouble(TestClassData::classTime).sum();

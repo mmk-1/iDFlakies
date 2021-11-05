@@ -36,7 +36,7 @@ public class SQLite {
     public void save() throws SQLException {
         System.out.println("[INFO] Writing database to: " + db.toAbsolutePath());
 
-        connection.createStatement().executeUpdate("backup to "+ db.toAbsolutePath());
+        connection.createStatement().executeUpdate("backup to " + db.toAbsolutePath());
     }
 
     public Procedure statement(final Path path) {

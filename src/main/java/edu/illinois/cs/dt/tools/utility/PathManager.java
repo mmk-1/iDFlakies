@@ -1,18 +1,19 @@
 package edu.illinois.cs.dt.tools.utility;
 
-import com.google.common.base.Preconditions;
 import edu.illinois.cs.testrunner.configuration.Configuration;
 import edu.illinois.cs.testrunner.coreplugin.TestPluginUtil;
 import edu.illinois.cs.testrunner.util.ProjectWrapper;
 
-import java.io.IOException;
+import com.google.common.base.Preconditions;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class PathManager {
     private static final String outputPath = Configuration.config().getProperty("dt.cache.absolute.path", "");
+
     public static Path modulePath() {
         return TestPluginUtil.project.getBasedir().toPath();
     }

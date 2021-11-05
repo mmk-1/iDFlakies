@@ -13,7 +13,8 @@ public class QueryColumn {
     private final String typeName;
 
     public QueryColumn(final ResultSetMetaData metaData, final int i) throws SQLException {
-        this(i, metaData.getColumnName(i), metaData.getColumnLabel(i), metaData.getColumnType(i), metaData.getColumnTypeName(i));
+        this(i, metaData.getColumnName(i), metaData.getColumnLabel(i), metaData.getColumnType(i),
+            metaData.getColumnTypeName(i));
     }
 
     public QueryColumn(final int index, final String name, final String label, final int type, final String typeName) {

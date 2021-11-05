@@ -50,7 +50,8 @@ public class ErrorLogger {
                             final Path dest = PathManager.cachePath().resolve(path.getFileName());
 
                             if (Files.exists(dest)) {
-                                Files.copy(path, PathManager.cachePath().resolve(path.getFileName()), StandardCopyOption.REPLACE_EXISTING);
+                                Files.copy(path, PathManager.cachePath().resolve(path.getFileName()),
+                                    StandardCopyOption.REPLACE_EXISTING);
                             } else {
                                 Files.copy(path, PathManager.cachePath().resolve(path.getFileName()));
                             }

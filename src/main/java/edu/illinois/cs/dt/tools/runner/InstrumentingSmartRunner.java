@@ -8,6 +8,7 @@ import edu.illinois.cs.testrunner.runner.TestInfoStore;
 import edu.illinois.cs.testrunner.util.ExecutionInfo;
 import edu.illinois.cs.testrunner.util.ExecutionInfoBuilder;
 import edu.illinois.cs.testrunner.util.TempFiles;
+
 import scala.collection.immutable.Stream;
 import scala.util.Failure;
 import scala.util.Try;
@@ -18,6 +19,12 @@ import java.util.Map;
 public class InstrumentingSmartRunner extends SmartRunner {
     private Path outputPath;
 
+    private InstrumentingSmartRunner(final TestFramework testFramework, final TestInfoStore infoStore,
+                                     final String cp, final Map<String, String> env, final Path outputPath) {
+        super(testFramework, infoStore, cp, env, outputPath);
+
+    }
+
     public static InstrumentingSmartRunner fromRunner(final Runner runner) {
         if (runner instanceof SmartRunner) {
             return new InstrumentingSmartRunner(runner.framework(), ((SmartRunner) runner).info(),
@@ -26,12 +33,6 @@ public class InstrumentingSmartRunner extends SmartRunner {
             return new InstrumentingSmartRunner(runner.framework(), new TestInfoStore(),
                                                 runner.classpath(), runner.environment(), runner.outputPath());
         }
-    }
-
-    private InstrumentingSmartRunner(final TestFramework testFramework, final TestInfoStore infoStore,
-                                     final String cp, final Map<String, String> env, final Path outputPath) {
-        super(testFramework, infoStore, cp, env, outputPath);
-
     }
 
     @Override
@@ -60,7 +61,7 @@ public class InstrumentingSmartRunner extends SmartRunner {
                 }
 
                 return testRunResultTry;
-            } catch (Exception e){
+            } catch (Exception e) {
                 return new Failure<>(e);
             }
         });

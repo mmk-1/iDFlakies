@@ -1,5 +1,7 @@
 package edu.illinois.cs.dt.tools.utility;
 
+import edu.illinois.cs.testrunner.configuration.Configuration;
+
 import com.reedoei.eunomia.util.StandardMain;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -7,9 +9,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -21,12 +20,31 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
-import edu.illinois.cs.testrunner.configuration.Configuration;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 public class GetMavenTestOrder extends StandardMain {
+    private boolean mvnTestMustPass =
+        Boolean.parseBoolean(Configuration.config().getProperty("dt.mvn_test.must_pass","true"));
 
-    private boolean mvnTestMustPass = Boolean.parseBoolean(Configuration.config().getProperty("dt.mvn_test.must_pass","true"));
-    
+    private final Path mvnTestLog;
+    private final Path sureFireDirectory;
+
+    public GetMavenTestOrder(final Path sureFireDirectory, final Path mvnTestLog) {
+        super(new String[0]);
+
+        this.sureFireDirectory = sureFireDirectory;
+        this.mvnTestLog = mvnTestLog;
+    }
+
+    private GetMavenTestOrder(final String[] args) {
+        super(args);
+
+        this.sureFireDirectory = Paths.get(getArgRequired("sureFireDirectory")).toAbsolutePath();
+        this.mvnTestLog = Paths.get(getArgRequired("mvnTestLog")).toAbsolutePath();
+    }
+
     @Override
     protected void run() throws Exception {
         final List<String> classOrder = getClassOrder(mvnTestLog.toFile());
@@ -70,7 +88,8 @@ public class GetMavenTestOrder extends StandardMain {
         }
     }
 
-    private TreeMap<Long, List<TestClassData>> testClassDataMap() throws IOException, ParserConfigurationException, SAXException {
+    private TreeMap<Long, List<TestClassData>> testClassDataMap()
+            throws IOException, ParserConfigurationException, SAXException {
         final List<Path> allResultsFolders = Files.walk(sureFireDirectory)
                 .filter(path -> path.toString().contains("TEST-"))
                 .collect(Collectors.toList());
@@ -174,13 +193,13 @@ public class GetMavenTestOrder extends StandardMain {
         int errors = Integer.parseInt(rootElement.getAttribute("errors"));
         int failures = Integer.parseInt(rootElement.getAttribute("failures"));
 
-	if (mvnTestMustPass){
-	    if (errors != 0 || failures != 0) {
-		// errors/failures found in the test suite from running mvn test.
-		// this test suite should not proceed to use detectors
-		throw new RuntimeException("Failures or errors occurred in mvn test");
-	    }
-	}
+        if (mvnTestMustPass) {
+            if (errors != 0 || failures != 0) {
+                // errors/failures found in the test suite from running mvn test.
+                // this test suite should not proceed to use detectors
+                throw new RuntimeException("Failures or errors occurred in mvn test");
+            }
+        }
 
         className = rootElement.getAttribute("name");
         testTime = Double.parseDouble(rootElement.getAttribute("time"));
@@ -205,23 +224,6 @@ public class GetMavenTestOrder extends StandardMain {
         }
 
         return new TestClassData(className, testNames, testTime);
-    }
-
-    private final Path mvnTestLog;
-    private final Path sureFireDirectory;
-
-    public GetMavenTestOrder(final Path sureFireDirectory, final Path mvnTestLog) {
-        super(new String[0]);
-
-        this.sureFireDirectory = sureFireDirectory;
-        this.mvnTestLog = mvnTestLog;
-    }
-
-    private GetMavenTestOrder(final String[] args) {
-        super(args);
-
-        this.sureFireDirectory = Paths.get(getArgRequired("sureFireDirectory")).toAbsolutePath();
-        this.mvnTestLog = Paths.get(getArgRequired("mvnTestLog")).toAbsolutePath();
     }
 
     public static void main(final String[] args) {

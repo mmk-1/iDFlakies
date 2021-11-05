@@ -1,9 +1,5 @@
 package edu.illinois.cs.dt.tools.detection;
 
-import com.google.gson.Gson;
-import com.reedoei.eunomia.collections.ListEx;
-import com.reedoei.eunomia.io.files.FileUtil;
-import com.reedoei.eunomia.util.StandardMain;
 import edu.illinois.cs.dt.tools.analysis.ResultDirVisitor;
 import edu.illinois.cs.dt.tools.detection.classifiers.DependentClassifier;
 import edu.illinois.cs.dt.tools.detection.classifiers.NonorderClassifier;
@@ -14,6 +10,11 @@ import edu.illinois.cs.dt.tools.utility.MD5;
 import edu.illinois.cs.dt.tools.utility.TestRunParser;
 import edu.illinois.cs.testrunner.data.results.Result;
 import edu.illinois.cs.testrunner.data.results.TestRunResult;
+
+import com.google.gson.Gson;
+import com.reedoei.eunomia.collections.ListEx;
+import com.reedoei.eunomia.io.files.FileUtil;
+import com.reedoei.eunomia.util.StandardMain;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.FileInputStream;
@@ -61,7 +62,8 @@ public class DependentTestExtractor extends StandardMain {
 
         for (int i = 0; i < allResultsFolders.size(); i++) {
             final Path resultsFolder = allResultsFolders.get(i);
-            System.out.println("[INFO] Extracting results from " + resultsFolder + " (" + i + " of " + allResultsFolders.size() + ")");
+            System.out.println("[INFO] Extracting results from " + resultsFolder
+                + " (" + i + " of " + allResultsFolders.size() + ")");
             final Optional<String> subjectNameOpt = readProjectName(resultsFolder);
 
             final String subjectName;
@@ -103,13 +105,12 @@ public class DependentTestExtractor extends StandardMain {
 
     private boolean isNew(final DependentTestList dependentTestList, final DependentTest dependentTest) {
         final BiPredicate<TestRun, TestRun> pred =
-                (a, b) -> MD5.hashOrder(a.order()).equals(MD5.hashOrder(b.order()));
+            (a, b) -> MD5.hashOrder(a.order()).equals(MD5.hashOrder(b.order()));
 
         return dependentTestList.dts().stream()
-                .anyMatch(dt -> !pred.test(dt.intended(), dependentTest.intended()) ||
-                                !pred.test(dt.revealed(), dependentTest.revealed())) ||
-               dependentTestList.dts().stream()
-                .noneMatch(dt -> dt.name().equals(dependentTest.name()));
+            .anyMatch(dt -> !pred.test(dt.intended(), dependentTest.intended())
+                || !pred.test(dt.revealed(), dependentTest.revealed()))
+                || dependentTestList.dts().stream().noneMatch(dt -> dt.name().equals(dependentTest.name()));
     }
 
     private void save(final String subjectName, final DependentTestList extracted) throws IOException {
@@ -126,7 +127,8 @@ public class DependentTestExtractor extends StandardMain {
                         }
                     }
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
         System.out.println("[INFO] Writing dt list to (" + extracted.size() + " tests) to: " + outputFile);
@@ -141,8 +143,9 @@ public class DependentTestExtractor extends StandardMain {
     }
 
     private DependentTestList dependentTests(final String subjectName, final List<TestRunResult> results) {
+        // TODO: Create a setting to control this
         try (final NonorderClassifier nonorderClassifier = new NonorderClassifier();
-             final DependentClassifier dependentClassifier = new DependentClassifier(false)) { // TODO: Create a setting to control this
+             final DependentClassifier dependentClassifier = new DependentClassifier(false)) {
             for (int i = 0; i < results.size(); i++) {
                 final TestRunResult testRunResult = results.get(i);
                 System.out.printf("\rUpdating classifiers with test run %s of %s (no: %d, od: %d): %s",
