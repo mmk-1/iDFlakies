@@ -26,7 +26,7 @@ public class TuscanInterClassTest {
         "cn.edu.hfut.dmic.webcollector.util.OkHttpRequesterTest.testHttpCode"
         };
         List<String> tests = Arrays.asList(testArray);
-        HashMap<String, List<String>> tempClassToMethods = TuscanIntraClassTest.generateClassToMethods(tests);
+        HashMap<String, List<String>> tempClassToMethods = generateClassToMethods(tests);
         int rounds = TuscanInterClassDetector.findNumberOfRounds(tempClassToMethods);
         TestShuffler testShuffler = new TestShuffler("", 0, tests, null);
         List<String> classes = new ArrayList<String>();
@@ -117,5 +117,17 @@ public class TuscanInterClassTest {
             }
         }
         return allPairs;
+    }
+
+    public static HashMap<String, List<String>> generateClassToMethods (List<String> tests) {
+        HashMap<String, List<String>> classToMethods = new HashMap<>();
+        for (final String test : tests) {
+            final String className = TestShuffler.className(test);
+            if (!classToMethods.containsKey(className)) {
+                classToMethods.put(className, new ArrayList<>());
+            }
+            classToMethods.get(className).add(test);
+        }
+        return classToMethods;
     }
 }
