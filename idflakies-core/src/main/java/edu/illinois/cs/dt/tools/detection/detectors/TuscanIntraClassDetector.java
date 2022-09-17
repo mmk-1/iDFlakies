@@ -72,7 +72,7 @@ public class TuscanIntraClassDetector extends ExecutingDetector {
             }
         }
         this.tests = tests;
-        this.testShuffler = new TestShuffler(type, rounds, tests, baseDir);
+        this.testShuffler = new TestShuffler(type, this.rounds, tests, baseDir);
         this.origResult = DetectorUtil.originalResults(tests, runner);
         if (runner instanceof InstrumentingSmartRunner) {
             addFilter(new ConfirmationFilter(name, tests, (InstrumentingSmartRunner) runner));
