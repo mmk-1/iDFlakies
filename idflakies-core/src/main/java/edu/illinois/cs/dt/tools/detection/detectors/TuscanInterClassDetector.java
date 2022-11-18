@@ -36,6 +36,10 @@ public class TuscanInterClassDetector extends ExecutingDetector {
 
     public static int findNumberOfRounds (HashMap<String, List<String>> classToMethods) {
         int classSize = classToMethods.keySet().size();
+        if (classSize == 1) {
+            // If there is only one class, just run one round
+            return 1;
+        }
         List<String> classes = new ArrayList<>(classToMethods.keySet());
         Collections.sort(classes);
         int[][] classPermutations = Tuscan.generateTuscanPermutations(classSize);
@@ -51,6 +55,12 @@ public class TuscanInterClassDetector extends ExecutingDetector {
                 String next = classes.get(classPermutations[i][j + 1]);
                 int size1 = classToMethods.get(current).size();
                 int size2 = classToMethods.get(next).size();
+                if (size1 == 3 || size1 == 5) {
+                    size1++;
+                }
+                if (size2 == 3 || size2 == 5) {
+                    size2++;
+                }
                 methodSize += (size1 * size2);
             }
             tempRounds += methodSize;
